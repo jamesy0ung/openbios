@@ -409,19 +409,22 @@ arch_init( void )
 int
 read_from_disk( int channel, int unit, int blk, unsigned long mphys, int size )
 {
-	// channels and units not supported yet.
-	unsigned char *buf=(unsigned char *)mphys;
+    unsigned char *buf = (unsigned char *)mphys;
+    ssize_t bytes_read;
 
-	if(diskemu==-1)
-		return -1;
+    if(diskemu == -1)
+        return -1;
 
-	//printk("read: ch=%d, unit=%d, blk=%ld, phys=%lx, size=%d\n",
-	//		channel, unit, blk, mphys, size);
+    if (lseek(diskemu, (ducell)blk*512, SEEK_SET) == -1) {
+        return -1;
+    }
 
-	lseek(diskemu, (ducell)blk*512, SEEK_SET);
-	read(diskemu, buf, size);
+    bytes_read = read(diskemu, buf, size);
+    if (bytes_read < 0 || bytes_read != size) {
+        return -1;
+    }
 
-	return 0;
+    return 0;
 }
 
 /*
